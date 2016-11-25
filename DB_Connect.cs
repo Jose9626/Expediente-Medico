@@ -1,24 +1,12 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
 using System.Collections.Generic;
-using MySql.Data.MySqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data;
 using System.Windows.Forms;
 
-namespace Progra_3
+namespace ConnectionTest
 {
-    class DB_Connect
+    internal class DB_Connect
     {
-
-        static int Main(string[] args)
-        {
-            DB_Connect test = new DB_Connect();
-            test.OpenConnection();
-            test.Insert();
-            test.CloseConnection();
-            return 0;
-        }
 
         private MySqlConnection connection;
         private string server;
@@ -100,22 +88,54 @@ namespace Progra_3
         }
 
         //Insert statement string tableName, string[] columns, string[] values
-        public void Insert()
+        public void Insert(string tableName, string[] columnsList, string[] valuesList)
         {
-            string query = "INSERT INTO Telefonos (telefono, cedula) VALUES(88888888, 188888888)";
+            string columns;
+            if (columnsList.Length == 0) columns = "";
+            else
+            {
+                columns = "(" + columnsList[0];
+                for (int i = 1; i < columnsList.Length; i++)
+                    columns += ", " + columnsList[i];
+                columns += ")";
+            }
+
+            string values;
+            if (valuesList.Length == 0)
+            {
+                MessageBox.Show("Error a la hora de ingresar el dato. Intentelo de nuevo.", "ATENCION!");
+                return;
+            }
+            else
+            {
+                values = "(" + valuesList[0];
+                for (int i = 1; i < valuesList.Length; i++)
+                    values += ", " + valuesList[i];
+                values += ")";
+            }
+
+            string query = "INSERT INTO " + tableName + " " + columns + "VALUES" + values;
 
             //open connection
             if (this.OpenConnection() == true)
             {
-                //create command and assign the query and connection from the constructor
-                MySqlCommand cmd = new MySqlCommand(query, connection);
+                try
+                {
+                    //create command and assign the query and connection from the constructor
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
 
-                //Execute command
-                cmd.ExecuteNonQuery();
+                    //Execute command
+                    cmd.ExecuteNonQuery();
+                }
+                catch
+                {
+                    MessageBox.Show("Error a la hora de ingresar el dato. Intentelo de nuevo.", "ATENCION!");
+                }
 
                 //close connection
                 this.CloseConnection();
             }
+
         }
 
         //Update statement
@@ -129,45 +149,24 @@ namespace Progra_3
         }
 
         //Select statement
-        public List<string>[] Select()
+        public DataSet Select()
         {
-            string query = "SELECT * FROM tableinfo";
-
-            //Create a list to store the result
-            List<string>[] list = new List<string>[3];
-            list[0] = new List<string>();
-            list[1] = new List<string>();
-            list[2] = new List<string>();
-
-            //Open connection
-            if (this.OpenConnection() == true)
+            DataSet datatable = new DataSet();
+            try
             {
-                //Create Command
-                MySqlCommand cmd = new MySqlCommand(query, connection);
-                //Create a data reader and Execute the command
-                MySqlDataReader dataReader = cmd.ExecuteReader();
+                MySqlCommand command = new MySqlCommand("SELECT * FROM " + "Telefonos", connection);
 
-                //Read the data and store them in the list
-                while (dataReader.Read())
-                {
-                    list[0].Add(dataReader["id"] + "");
-                    list[1].Add(dataReader["name"] + "");
-                    list[2].Add(dataReader["age"] + "");
-                }
+                MySqlDataAdapter adapter = new MySqlDataAdapter();
+                adapter.SelectCommand = command;
+                adapter.Fill(datatable);
 
-                //close Data Reader
-                dataReader.Close();
-
-                //close Connection
-                this.CloseConnection();
-
-                //return list to be displayed
-                return list;
+                return datatable;
             }
-            else
+            catch (MySqlException ex)
             {
-                return list;
+                MessageBox.Show(ex.Message);
             }
+            return null;
         }
 
         //Count statement
@@ -206,6 +205,4 @@ namespace Progra_3
         {
         }
     }
-
-
 }
