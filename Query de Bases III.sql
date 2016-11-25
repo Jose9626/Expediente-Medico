@@ -13,11 +13,11 @@ CREATE TABLE Personas(
     contraseña varchar(20),
     PRIMARY KEY(cedula_persona)
     );
-      
     
 create table Tipos_Centros(tipo_centro varchar(20) primary key);
 
 create table Centro_Atencion(
+	codigo_centro int,
 	nombre varchar(30),
     provincia_ubicacion varchar(10),
     canton_ubicacion varchar(30),
@@ -26,11 +26,11 @@ create table Centro_Atencion(
     capacidad_max_pacientes int,
     tipo_centro varchar(20),
     telefono numeric(8,0),
+    primary key(codigo_centro),
     foreign key (tipo_centro) references Tipos_Centros(tipo_centro),
     check(capacidad_max_pacientes>0)
 	);
    
-    
 create table Funcionario (
 	cedula_persona numeric(9,0) primary key,
     codigo_adicional int ,
@@ -47,6 +47,7 @@ create table Catalogo_Diagnosticos(
 );
 
 create table Tipos_Tratamiento(tipo_tratamiento varchar(20) primary key);
+
 create table Formas_Aplicacion(forma_aplicacion varchar(20) primary key);
 
 create table Catalogo_de_Tratamientos(
@@ -59,15 +60,15 @@ create table Catalogo_de_Tratamientos(
     forma_aplicacion varchar(30));
 
 create table Telefonos(
-	telefono numeric(8,0),
+	telefono numeric(8,0) primary key,
     cedula numeric(9,0));
 
 create table Paises(
-	codigo_pais char(3),
+	codigo_pais char(3) primary key,
     nombre_pais varchar(40));
     
 create table Diagnosticos(
-	codigo_cita int,
+	codigo_cita int primary key,
     codigo_tratamiento char(10),
     nombre_diagnostico varchar(30),
     nivel varchar(10),
@@ -88,12 +89,18 @@ create table Bitacora_Citas(
 	Codigo_cita int,
     estado varchar(20),
     fecha_modificacion date, 
-    hora_modificacion date);
+    hora_modificacion date,
+    primary key (Codigo_cita,estado));
     
-create table Area_por_Centro
-	(codigo_centro int ,
+create table Tipos_Areas(nombre_area varchar(25) primary key);
+
+create table Area_por_Centro(
+	codigo_centro int ,
     nombre_area varchar(15),
-    capacidad int
+    capacidad int,
+	primary key (codigo_centro,nombre_area)
     );
     
 create table Tipos_Roles(rol varchar(15) primary key);
+
+insert into Tipos_Roles values ('bhjaXSBHJASD');
