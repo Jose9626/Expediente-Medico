@@ -139,7 +139,7 @@ namespace Progra_3
         }
 
         //Update statement
-        public void Update(string table, string columnlist,string valuelist,string condition)
+        public void Update(string table, string[] columnlist,string[] valuelist,string condition)
         {
             try
             {
