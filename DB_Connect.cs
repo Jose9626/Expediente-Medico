@@ -150,7 +150,7 @@ namespace Progra_3
                     set += "," + columnlist[pos] + " = " + valuelist[pos];
                     pos++;
                 }
-                string query = "UPDATE " + tableName + " SET " + set + condition;
+                string query = "UPDATE " + tableName + " SET " + set + " WHERE " + condition;
 
                 Boolean flag;
                 try
