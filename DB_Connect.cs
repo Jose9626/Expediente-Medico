@@ -152,6 +152,7 @@ namespace Progra_3
                 }
                 string query = "UPDATE " + tableName + " SET " + set + condition;
 
+                Boolean flag;
                 try
                 {
                     //create command and assign the query and connection from the constructor
@@ -159,17 +160,18 @@ namespace Progra_3
 
                     //Execute command
                     cmd.ExecuteNonQuery();
-
-                    //close connection
-                    this.CloseConnection();
-
-                    return true;
+                    
+                    flag = true;
                 }
                 catch (MySqlException ex)
                 {
                     Console.WriteLine(ex);
-                    return false;
+                    flag = false;
                 }
+                
+                //close connection
+                this.CloseConnection();
+                return flag;
             }
             return false;
         }
