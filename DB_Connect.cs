@@ -139,13 +139,56 @@ namespace Progra_3
         }
 
         //Update statement
-        public void Update()
+        public void Update(string table, string columnlist,string valuelist,string condition)
         {
+            try
+            {
+                int pos = 0;
+                string set = "";
+                while (columnlist.Count() != pos)
+                {
+                    set += columnlist.ElementAt(pos) + " = " + valuelist.ElementAt(pos);
+                    pos++;
+                    if (columnlist.Count() != pos)
+                    {
+                        set += ",";
+                    }
+                    set += " ";
+                }
+                string query = "UPDATE " + table + " SET " + set + condition;
+                if (this.OpenConnection() == true)
+                {
+                    //create command and assign the query and connection from the constructor
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+
+                    //Execute command
+                    cmd.ExecuteNonQuery();
+
+                    //close connection
+                    this.CloseConnection();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Ha ocurrido un error, por favor intente de nuevo");
+            }
         }
 
         //Delete statement
-        public void Delete()
+        public void Delete(string table, string condition)
         {
+            string query = "DELETE FROM " + table + condition;
+            if (this.OpenConnection() == true)
+            {
+                //create command and assign the query and connection from the constructor
+                MySqlCommand cmd = new MySqlCommand(query, connection);
+
+                //Execute command
+                cmd.ExecuteNonQuery();
+
+                //close connection
+                this.CloseConnection();
+            }
         }
 
         //  Extrae los nombres de las tablas de la base de datos.
