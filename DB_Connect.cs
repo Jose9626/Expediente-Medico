@@ -139,24 +139,20 @@ namespace Progra_3
         }
 
         //Update statement
-        public void Update(string table, string[] columnlist,string[] valuelist,string condition)
+        public Boolean Update(string tableName, string[] columnlist, string[] valuelist, string condition)
         {
-            try
+            if (this.OpenConnection() == true)
             {
                 int pos = 0;
-                string set = "";
-                while (columnlist.Count() != pos)
+                string set = columnlist[pos] + " = " + valuelist[pos];
+                while (pos < columnlist.Length)
                 {
-                    set += columnlist.ElementAt(pos) + " = " + valuelist.ElementAt(pos);
+                    set += "," + columnlist[pos] + " = " + valuelist[pos];
                     pos++;
-                    if (columnlist.Count() != pos)
-                    {
-                        set += ",";
-                    }
-                    set += " ";
                 }
-                string query = "UPDATE " + table + " SET " + set + condition;
-                if (this.OpenConnection() == true)
+                string query = "UPDATE " + tableName + " SET " + set + condition;
+
+                try
                 {
                     //create command and assign the query and connection from the constructor
                     MySqlCommand cmd = new MySqlCommand(query, connection);
@@ -166,12 +162,16 @@ namespace Progra_3
 
                     //close connection
                     this.CloseConnection();
+
+                    return true;
+                }
+                catch (MySqlException ex)
+                {
+                    Console.WriteLine(ex);
+                    return false;
                 }
             }
-            catch
-            {
-                MessageBox.Show("Ha ocurrido un error, por favor intente de nuevo");
-            }
+            return false;
         }
 
         //Delete statement
