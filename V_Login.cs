@@ -17,7 +17,7 @@ namespace Progra_3
          *  ATTRIBUTES
          * 
          ***************************/
-        private DB_CRUD crud;
+        private DB_Connect connection;
         private V_Main main_view;
 
         /****************************
@@ -27,11 +27,8 @@ namespace Progra_3
          ***************************/
         public V_Login()
         {
-            //  DATA BASE SOURCES
-            //  JOEL: 
-            //  JOSE: 
-            //  EDWIN: 
-            crud = new DB_CRUD("");
+            //  DATA BASE CONNECTION
+            connection = new DB_Connect();
             InitializeComponent();
         }
 
@@ -43,11 +40,61 @@ namespace Progra_3
 
         private void entry()
         {
-            main_view = new V_Main(this, this.crud, comboBox_rol.SelectedItem.ToString());
-            main_view.Show();
+            // Variables
+            string user = textBox_user.Text;
+            string pass = textBox_pass.Text;
+            string rol = comboBox_rol.SelectedItem.ToString();
 
-            this.Hide();
+            Console.Out.WriteLine("user='" + user + "'");
+            Console.Out.WriteLine("pass='" + pass + "'");
+            Console.Out.WriteLine("rol='" + rol + "'");
+
+            try
+            {
+                // 
+                DataSet dataset_person = connection.Select("Personas", new string[] { "cedula_persona", "contrasena" }, "cedula_persona = " + user);
+
+                Console.Out.WriteLine(pass + "==" + dataset_person.Tables[0].Rows[0][1]);
+                // 
+                if (pass.Equals(dataset_person.Tables[0].Rows[0][1]))
+                {
+                    // 
+                    Console.Out.WriteLine(rol + "!=Paciente");
+                    if (!rol.Equals("Paciente"))
+                    {
+                        try
+                        {
+                            DataSet dataset_functionary = connection.Select("Funcionarios", new string[] { "cedula_persona", "area_labora" }, "cedula_persona=" + user);
+                            rol = dataset_functionary.Tables[0].Rows[0][1].ToString();
+                            Console.Out.WriteLine("NEW Rol='" + rol + "'");
+                        }
+                        catch
+                        {
+                            Console.Out.WriteLine("Error 3");
+                            MessageBox.Show("El usuario no es un funcionario, favor cambiar el área a paciente.", "ATENCIÓN!");
+                            return;
+                        }
+
+                    }
+
+                    main_view = new V_Main(this, this.connection, user, rol);
+                    main_view.Show();
+
+                    this.Hide();
+                }
+                else {
+                    Console.Out.WriteLine("Error 2");
+                    MessageBox.Show("El usuario o la contraseña no son validos, vuelva a intentarlo con otro usuario o contraseña.", "ERROR!");
+                }
+            }
+            catch
+            {
+                Console.Out.WriteLine("Error 1");
+                MessageBox.Show("Los datos no coinciden con la base de datos.", "ERROR!");
+            }
         }
+
+
 
         /****************************
          * 

@@ -107,14 +107,11 @@
             "Secretario (a)",
             "Enfermero (a)",
             "Doctor (a)",
-            "Administrador (Base de Datos)"});
+            "Administrador de Sistemas"});
             this.comboBox_rol.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.comboBox_rol.Items.AddRange(new object[] {
-            "Administrador (Base de Datos)",
-            "Doctor (a)",
-            "Enfermero (a)",
             "Paciente",
-            "Secretario (a)"});
+            "Funcionario"});
             this.comboBox_rol.Location = new System.Drawing.Point(180, 128);
             this.comboBox_rol.Name = "comboBox_rol";
             this.comboBox_rol.Size = new System.Drawing.Size(298, 28);

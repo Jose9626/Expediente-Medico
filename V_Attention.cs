@@ -13,10 +13,10 @@ namespace Progra_3
     public partial class V_Attention : Form
     {
         private V_Main v_Main;
-        private DB_CRUD crud;
+        private DB_Connect crud;
         private string cod;
 
-        public V_Attention(V_Main v_Main, DB_CRUD crud, string cod)
+        public V_Attention(V_Main v_Main, DB_Connect crud, string cod)
         {
             this.v_Main = v_Main;
             this.crud = crud;

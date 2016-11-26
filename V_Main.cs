@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Windows.Forms;
 
 namespace Progra_3
@@ -11,8 +13,10 @@ namespace Progra_3
          * 
          ***************************/
         private V_Login v_Login;
-        private DB_CRUD crud;
+        private DB_Connect crud;
 
+        private string user;
+        private string special_condition;
         private string user_type;
 
         /****************************
@@ -25,15 +29,19 @@ namespace Progra_3
             InitializeComponent();
         }
 
-        public V_Main(V_Login v_Login, DB_CRUD crud, string type)
+        public V_Main(V_Login v_Login, DB_Connect crud, string user, string type)
         {
             this.v_Login = v_Login;
             this.crud = crud;
+
+            this.user = user;
             this.user_type = type;
 
             InitializeComponent();
 
             build_according_to_type();
+
+            showTableMain(comboBox_selectTable.Text, "*", special_condition);
         }
 
 
@@ -53,6 +61,9 @@ namespace Progra_3
             ToolStripItemCollection collection = toolStripDropDownButton_reports.DropDownItems;
             string[] reportList = new string[] { };
 
+            // Elementos para la seleccion de tablas
+            List<string> tableList = crud.getTablesList();
+
             // Elementos para la gestion del panel de funciones
             string[] functionList = new string[] { };
             Button[] functionButtons = {    button_function_1,
@@ -62,16 +73,17 @@ namespace Progra_3
 
             switch (this.user_type)
             {
-                case "Administrador (Base de Datos)":
+                case "Administrador de Sistemas":
                     this.flowLayoutPanel_options.Controls.Add(this.panel_selectTable);
 
                     functionList = new string[] {   "Agregar tupla",
                                                     "Leer tupla",
                                                     "Modificar tupla",
                                                     "Borrar tupla" };
+                    special_condition = "";
                     break;
 
-                case "Doctor (a)":
+                case "Doctor":
                     reportList = new string[] { "Citas del sistema",
                                                 "Diagnosticos asociados a un paciente",
                                                 "Tratamientos asociados a un paciente",
@@ -83,8 +95,10 @@ namespace Progra_3
                                                     "Paciente se ausentó",
                                                     "Programar Cita",
                                                     "Cancelar Cita" };
+
+                    special_condition = "Funcionarios.codigo_centro = Citas.codigo_centro";
                     break;
-                case "Enfermero (a)":
+                case "Enfermero":
                     reportList = new string[] { "Citas del sistema",
                                                 "Diagnosticos asociados a un paciente",
                                                 "Tratamientos asociados a un paciente",
@@ -96,14 +110,18 @@ namespace Progra_3
                                                     "Programar Cita",
                                                     "Cancelar Cita",
                                                     "" };
+
+                    special_condition = "Funcionarios.codigo_centro = Citas.codigo_centro";
                     break;
 
-                case "Secretario (a)":
+                case "Secretario":
                     reportList = new string[] { "Citas del sistema" };
 
                     functionList = new string[] {   "Programar Cita",
                                                     "Cancelar Cita",
                                                     "","" };
+
+                    special_condition = "Funcionarios.codigo_centro = Citas.codigo_centro";
                     break;
 
                 default:
@@ -114,6 +132,7 @@ namespace Progra_3
                     functionList = new string[] {   "Programar Cita",
                                                     "Cancelar Cita",
                                                     "","" };
+                    special_condition = "Citas.cedula_paciente = " + this.user;
                     break;
             }
 
@@ -126,6 +145,8 @@ namespace Progra_3
 
                 collection.Add(reportButton);
             }
+
+            comboBox_selectTable.Items.AddRange(tableList.ToArray());
 
             for (int i = 0; i < 4; i++)
             {
@@ -147,11 +168,9 @@ namespace Progra_3
 
         private void showTableMain(string tableName, string select, string where)
         {
-            string text = "Se ejecutará el siguiente comando: SELECT " + select + " FROM " + tableName;
-            if (!where.Equals(""))
-                text += " WHERE " + where;
-            MessageBox.Show(text, "ATENCIÓN!");
-            MessageBox.Show("La función solicitada aún no ha sido desarrollada para esta versión de software, pruebe actualizando el programa.", "ATENCIÓN!");
+            DataSet data = crud.Select(tableName, select, where);
+            dataGridView_main.DataSource = data.Tables[0];
+            dataGridView_main.Update();
         }
 
         /*******************

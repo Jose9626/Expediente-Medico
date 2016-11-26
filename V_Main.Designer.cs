@@ -242,23 +242,6 @@ namespace Progra_3
             // 
             this.comboBox_selectTable.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.comboBox_selectTable.FormattingEnabled = true;
-            this.comboBox_selectTable.Items.AddRange(new object[] {
-            "Areas_por_Centro",
-            "Bitacoras",
-            "Catalogo_Diagnosticos",
-            "Catalogo_Tratamientos",
-            "Centros_Atencion",
-            "Citas",
-            "Diagnosticos",
-            "Formas_Aplicacion",
-            "Funcionarios",
-            "Paises",
-            "Personas",
-            "Telefonos",
-            "Tipos_Areas",
-            "Tipos_Centros",
-            "Tipos_Roles",
-            "Tipos_Tratamientos"});
             this.comboBox_selectTable.Location = new System.Drawing.Point(19, 49);
             this.comboBox_selectTable.Name = "comboBox_selectTable";
             this.comboBox_selectTable.Size = new System.Drawing.Size(280, 28);
