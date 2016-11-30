@@ -129,7 +129,7 @@ create trigger check_Insert_Funcionarios before insert on Funcionarios
 	for each row
 		BEGIN
 		if (new.cedula_persona < 0 && new.codigo_adicional < 0 && new.codigo_centro < 0 && 
-		new.area_labora = '' && DateDiff(CURDate(),fecha_ingreso_institucion)<0)
+		new.area_labora = '' && DateDiff(CURDate(),new.fecha_ingreso_institucion)<0)
 			then
 				signal sqlstate '45000'   
 				set message_text = 'No se pueden agregar los datos, por favor revise los valores';
@@ -140,7 +140,7 @@ create trigger check_Update_Funcionarios before update on Funcionarios
 		for each row
 		BEGIN
 		if (new.cedula_persona < 0 && new.codigo_adicional < 0 && new.codigo_centro < 0 && 
-		new.area_labora = '' && DateDiff(CURDate(),fecha_ingreso_institucion)<0)
+		new.area_labora = '' && DateDiff(CURDate(),new.fecha_ingreso_institucion)<0)
 			then
 				signal sqlstate '45000'   
 				set message_text = 'No se pueden agregar los datos, por favor revise los valores';
@@ -354,7 +354,7 @@ create table Citas(
     cedula_paciente numeric (9,0) NOT NULL,
     codigo_centro int NOT NULL, 
     area_atencion varchar(30) NOT NULL,
-    fecho_solicitada date NOT NULL, 
+    fecha_solicitada date NOT NULL, 
     hora_solicitud time NOT NULL,
 	observacion varchar(120),
     estado varchar(40) NOT NULL
@@ -513,43 +513,4 @@ create trigger Insert_New_Appointment after insert on Citas
 			insert into Bitacora_Citas values(new.codigo_cita,new.estado,new.fecho_solicitada,new.hora_solicitud);
 		END $$
         
-create trigger Insert_New_Appointment after update on Citas
-	for each row
-		BEGIN
-			insert into Bitacora_Citas values(new.codigo_cita,new.estado,new.fecho_solicitada,new.hora_solicitud);
-		END $$
-
 DELIMITER ;
-
-/*
-insert into Tipos_Roles values ('bhjaXSBHJASD');
-
-update Tipos_Roles set rol = 'CHAOS' where (rol  = 'bhjaXSBHJASD');
-
-delete from Tipos_Roles where(rol = 'CHAOS');
-
-insert into Personas values(1,'sa','das','g','2001-08-08','A+','dasc','sahjhj');
-
-update Personas SET cedula_persona = 60 where cedula_persona = 1;
-
-update Personas SET cedula_persona = -4 where cedula_persona = 60;
-
-insert into Personas values(6,'sa','das',null,'2001-08-08','A+','dasc','sahjhj');
-
-insert into Personas values(12,'sa','','','2001-08-08','A+','dasc','sahjhj');
-
-insert into Personas values(-1,'sa','','','2001-08-08','A+','dasc','sahjhj');
-
-insert into Personas values(10,'sa','das','g','2001-08-08','A+','dasc','sahjhj');
-
-insert into Funcionarios values(-1,null,1,'gh','2001-08-08','Administrador de Bases de Datos');
-
-insert into Funcionarios values(6,null,1,'gh','2001-08-08','Doctor');
-
-insert into Funcionarios values(12,null,1,'gh','2001-08-08','Enfermero');
-
-insert into Funcionarios values(1,null,1,'gh','2001-08-08','Secretario');
-
-/*create function Decryption(nombre varchar(100), cedula int)
-	select * from Personas where (Personas.password = MD5('sahjhj'));
-    */
