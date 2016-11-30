@@ -14,6 +14,7 @@ CREATE TABLE Personas(
     password varchar(100) NOT NULL,
     PRIMARY KEY(cedula_persona)
     );
+    
 
 DELIMITER $$
 create trigger encrypt before insert on Personas
@@ -123,6 +124,7 @@ create table Funcionarios (
     rol varchar(40) NOT NULL,
     foreign key (cedula_persona) references Personas(cedula_persona)
 	);
+
 
 DELIMITER $$
 create trigger check_Insert_Funcionarios before insert on Funcionarios 
@@ -510,7 +512,11 @@ create procedure Get_Medical_Center_Number(out num_centro int)
 create trigger Insert_New_Appointment after insert on Citas
 	for each row
 		BEGIN
-			insert into Bitacora_Citas values(new.codigo_cita,new.estado,new.fecho_solicitada,new.hora_solicitud);
+			insert into Bitacora_Citas values(new.codigo_cita,new.estado,new.fecha_solicitada,new.hora_solicitud);
 		END $$
         
 DELIMITER ;
+
+    insert into Personas Values (1,'Nombre','Apellido1','Apellido2','1998-12-12','O-','Naciounidense','contra');
+    insert into Funcionarios Values (1,null,1,'Administracion','2014-01-01','Administrador de Sistemas');
+
