@@ -157,7 +157,7 @@ create table Catalogo_Diagnosticos(
 
 DELIMITER $$
 
-    create trigger check_Insert_Catalogo_Diagnosticos before insert on Catalogo_Diagnosticos 
+create trigger check_Insert_Catalogo_Diagnosticos before insert on Catalogo_Diagnosticos 
 	for each row
     BEGIN
     if (new.nombre_diagnostico = '' || new.codigo_tratamiento<0)
@@ -167,9 +167,9 @@ DELIMITER $$
 		END if;
     END $$
     
-    create trigger check_Update_Catalogo_Diagnosticos before update on Catalogo_Diagnosticos 
+create trigger check_Update_Catalogo_Diagnosticos before update on Catalogo_Diagnosticos 
 	for each row
-    begin
+    BEGIN
     if (new.nombre_diagnostico = '' || new.codigo_tratamiento<0)
 		then
 			signal sqlstate '45000'   
@@ -182,7 +182,7 @@ create table Tipos_Tratamiento(tipo_tratamiento varchar(20) primary key check(ti
 
 DELIMITER $$
 
-    create trigger check_Insert_Tipos_Tratamientos before insert on Tipos_Tratamiento 
+create trigger check_Insert_Tipos_Tratamientos before insert on Tipos_Tratamiento 
 	for each row
     BEGIN
     if (new.tipo_tratamiento = '')
@@ -192,7 +192,7 @@ DELIMITER $$
 		END if;
     END $$
     
-    create trigger check_Update_Tipos_Tratamiento before update on Tipos_Tratamiento 
+create trigger check_Update_Tipos_Tratamiento before update on Tipos_Tratamiento 
 	for each row
     BEGIN
     if (new.tipo_tratamiento = '')
@@ -235,9 +235,7 @@ create table Catalogo_de_Tratamientos(
     potencia_dosis int,
     frecuencia_dosis varchar(60),
     tipo_tratamiento varchar(20),
-    forma_aplicacion varchar(30),
-    check (codigo_tratamiento > 0 && nombre_tratamiento != '' && dosis > 0 && potencia_dosis >0 && 
-    frecuencia_dosis != '')
+    forma_aplicacion varchar(30)
     );
 
 DELIMITER $$
@@ -357,7 +355,7 @@ create table Citas(
     codigo_centro int NOT NULL, 
     area_atencion varchar(30) NOT NULL,
     fecho_solicitada date NOT NULL, 
-    hora_solicitud date NOT NULL,
+    hora_solicitud time NOT NULL,
 	observacion varchar(120),
     estado varchar(40) NOT NULL
     );
@@ -390,7 +388,7 @@ create table Bitacora_Citas(
 	Codigo_cita int,
     estado varchar(20) NOT NULL,
     fecha_modificacion date NOT NULL, 
-    hora_modificacion date NOT NULL,
+    hora_modificacion time NOT NULL,
     primary key (Codigo_cita,estado));
     
 DELIMITER $$
@@ -499,9 +497,29 @@ create procedure Get_Appointment_Number(out num_cita int)
 		select COUNT(codigo_cita)+1 into num_cita from Citas;
     END$$
     
-DELIMITER ;
+create procedure Get_Medical_Center_Number(out num_centro int)
+	BEGIN
+		select COUNT(codigo_centro)+1 into num_centro from Centro_Atencion;
+    END$$
+ 
+ create procedure Get_Treatment_Number(out num_tratamiento int)
+	BEGIN
+		select COUNT(codigo_tratamiento)+1 into num_tratamiento from  Catalogo_de_Tratamientos;
+    END$$
+    
+create trigger Insert_New_Appointment after insert on Citas
+	for each row
+		BEGIN
+			insert into Bitacora_Citas values(new.codigo_cita,new.estado,new.fecho_solicitada,new.hora_solicitud);
+		END $$
+        
+create trigger Insert_New_Appointment after update on Citas
+	for each row
+		BEGIN
+			insert into Bitacora_Citas values(new.codigo_cita,new.estado,new.fecho_solicitada,new.hora_solicitud);
+		END $$
 
-CALL Get_Appointment_Number(var int)
+DELIMITER ;
 
 /*
 insert into Tipos_Roles values ('bhjaXSBHJASD');
