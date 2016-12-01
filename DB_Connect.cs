@@ -1,7 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Windows.Forms;
 
 namespace Progra_3
 {
@@ -44,7 +44,7 @@ namespace Progra_3
         }
 
         //open connection to database
-        private bool OpenConnection()
+        public bool OpenConnection()
         {
             try
             {
@@ -61,19 +61,23 @@ namespace Progra_3
                 switch (ex.Number)
                 {
                     case 0:
-                        MessageBox.Show("No se puede conectar a la base de datos.  Contacte al administrator.");
+                        Console.Out.WriteLine("No se puede conectar a la base de datos.  Contacte al administrator.");
                         break;
 
                     case 1045:
-                        MessageBox.Show("El usuario o contraseña no son validos, por favor intentelo de nuevo.");
+                        Console.Out.WriteLine("El usuario o contraseña no son validos, por favor intentelo de nuevo.");
+                        break;
+                    default:
+                        Console.WriteLine(ex);
                         break;
                 }
                 return false;
             }
         }
 
-        //Close connection
-        private bool CloseConnection()
+
+    //Close connection
+    public bool CloseConnection()
         {
             try
             {
@@ -82,7 +86,7 @@ namespace Progra_3
             }
             catch (MySqlException ex)
             {
-                MessageBox.Show(ex.Message);
+                Console.WriteLine(ex);
                 return false;
             }
         }
@@ -103,7 +107,7 @@ namespace Progra_3
             string values;
             if (valuesList.Length == 0)
             {
-                MessageBox.Show("Error a la hora de ingresar el dato. Intentelo de nuevo.", "ERROR!");
+                Console.Out.WriteLine("Error a la hora de ingresar el dato. Intentelo de nuevo.", "ERROR!");
                 return;
             }
             else
@@ -116,8 +120,9 @@ namespace Progra_3
 
             string query = "INSERT INTO " + tableName + " " + columns + "VALUES" + values;
 
+            Console.Out.WriteLine("Query = " + query);
             // Open connection
-            if (this.OpenConnection() == true)
+            if (this.OpenConnection())
             {
                 try
                 {
@@ -127,9 +132,9 @@ namespace Progra_3
                     // Execute command
                     cmd.ExecuteNonQuery();
                 }
-                catch
+                catch (MySqlException ex)
                 {
-                    MessageBox.Show("Error a la hora de ingresar el dato. Intentelo de nuevo.", "ERROR!");
+                    Console.WriteLine(ex);
                 }
 
                 // Close connection
@@ -139,20 +144,26 @@ namespace Progra_3
         }
 
         //Update statement
-        public Boolean Update(string tableName, string[] columnlist, string[] valuelist, string condition)
+        public bool Update(string tableName, string[] columnlist, string[] valuelist, string condition)
         {
-            if (this.OpenConnection() == true)
+            int pos = 0;
+            string set = columnlist[pos] + "=" + valuelist[pos];
+            pos++;
+            while (pos < columnlist.Length)
             {
-                int pos = 0;
-                string set = columnlist[pos] + " = " + valuelist[pos];
-                while (pos < columnlist.Length)
-                {
-                    set += "," + columnlist[pos] + " = " + valuelist[pos];
-                    pos++;
-                }
+                set += ", " + columnlist[pos] + " = " + valuelist[pos];
+                pos++;
+            }
+
+            return Update(tableName, set, condition);
+        }
+
+        public bool Update(string tableName, string set, string condition) { 
+            bool flag = false;
+            if (this.OpenConnection())
+            {
                 string query = "UPDATE " + tableName + " SET " + set + " WHERE " + condition;
 
-                Boolean flag;
                 try
                 {
                     //create command and assign the query and connection from the constructor
@@ -160,7 +171,7 @@ namespace Progra_3
 
                     //Execute command
                     cmd.ExecuteNonQuery();
-                    
+
                     flag = true;
                 }
                 catch (MySqlException ex)
@@ -168,43 +179,54 @@ namespace Progra_3
                     Console.WriteLine(ex);
                     flag = false;
                 }
-                
+
                 //close connection
                 this.CloseConnection();
-                return flag;
             }
-            return false;
+            return flag;
         }
 
-        //Delete statement
-        public void Delete(string table, string condition)
+        // Delete statement
+        public bool Delete(string table, string condition)
         {
-            string query = "DELETE FROM " + table + condition;
-            if (this.OpenConnection() == true)
-            {
-                //create command and assign the query and connection from the constructor
-                MySqlCommand cmd = new MySqlCommand(query, connection);
+            string query = "DELETE FROM " + table + " WHERE " + condition;
 
-                //Execute command
-                cmd.ExecuteNonQuery();
+            bool flag = false;
+            if (this.OpenConnection())
+            {
+                try
+                {
+                    //create command and assign the query and connection from the constructor
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+
+                    //Execute command
+                    cmd.ExecuteNonQuery();
+                    flag = true;
+                }
+                catch (MySqlException ex)
+                {
+                    Console.WriteLine(ex);
+                    flag = false;
+                }
 
                 //close connection
                 this.CloseConnection();
             }
+            return flag;
         }
 
         //  Extrae los nombres de las tablas de la base de datos.
         public List<string> getTablesList()
         {
             List<string> tableNames = new List<string>();
-            if (this.OpenConnection() == true)
+            if (this.OpenConnection())
             {
                 try
                 {
                     string query = "SELECT * FROM information_schema.tables WHERE table_schema = '" + this.database + "'";
+
                     MySqlCommand command = new MySqlCommand(query, connection);
                     MySqlDataReader reader = command.ExecuteReader();
-                    reader.Read();
 
                     //  Este ciclo es donde se lee y guarda en la lista los nombres de las tablas.
                     while (reader.Read())
@@ -212,18 +234,53 @@ namespace Progra_3
                         string tmpName = reader.GetString(2);
                         tableNames.Add(tmpName);
                     }
-                    connection.Close();
+                    
                 }
-                catch
+                catch (MySqlException ex)
                 {
-                    //Console.WriteLine("Ha ocurrido un error y no se pudo desarrollar la accion");
+                    Console.WriteLine(ex);
+                    return null;
                 }
+                this.CloseConnection();
             }
             return tableNames;
         }
-        
+
+        public List<string> getColumnsFromTable(string tableName)
+        {
+            List<string> columns = new List<string>();
+
+            // Open connection
+            if (this.OpenConnection())
+            {
+                try
+                {
+                    string query = "SELECT * FROM information_schema.columns WHERE table_name = '" + tableName + "'";
+                    MySqlCommand command = new MySqlCommand(query, connection);
+                    MySqlDataReader reader = command.ExecuteReader();
+
+                    Console.Out.WriteLine(query);
+                    //  Este ciclo es donde se lee y guarda en la lista los nombres de los atributos.
+                    while (reader.Read())
+                    {
+                        Console.Out.WriteLine("Reader = "+ reader.GetString(3));
+                        string tmpName = reader.GetString(3);
+                        columns.Add(tmpName);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+
+                // Close connection
+                this.CloseConnection();
+            }
+            return columns;
+        }
+
         // Select statement from column array
-        public DataSet Select(string tableName, string[] columnsList, string condition)
+        public DataSet Select(string tableName, string[] columnsList, string condition, string groupBy)
         {
             // Generate column string list
             string columns;
@@ -235,23 +292,25 @@ namespace Progra_3
                     columns += ", " + columnsList[i];
             }
 
-            return Select(tableName, columns, condition);
+            return Select(tableName, columns, condition, groupBy);
         }
 
         // Select statement
-        public DataSet Select(string tableName, string columns, string condition) {
+        public DataSet Select(string tableName, string columns, string condition, string groupBy) {
 
             DataSet datatable = new DataSet();
 
             // Generate condition string
             if (condition != "") condition = " WHERE " + condition;
 
+            // Generate condition string
+            if (groupBy != "") condition = " GROUP BY " + condition;
+
             // Open connection
-            if (this.OpenConnection() == true)
+            if (this.OpenConnection())
             {
-
                 string query = "SELECT " + columns + " FROM " + tableName + condition;
-
+                Console.Out.WriteLine("QUERY = " + query);
                 try
                 {
                     // Create command and assign the query and connection from the constructor
@@ -263,14 +322,15 @@ namespace Progra_3
                     adapter.Fill(datatable);
 
                 }
-                catch 
+                catch (MySqlException ex)
                 {
-                    MessageBox.Show("Los valores seleccionados NO coinciden.","ERROR!");
+                    Console.WriteLine(ex);
                 }
 
                 // Close connection
                 this.CloseConnection();
             }
+            datatable.Tables.Add(new DataTable());
             return datatable;
         }
 
@@ -300,14 +360,35 @@ namespace Progra_3
             }
         }
 
-        //Backup
-        public void Backup()
+        public int execProc_Get_Appointment_Number()
         {
-        }
+            // Open connection
+            if (this.OpenConnection())
+            {
+                int result = -1;
+                try
+                {
+                    //Se crea el commando 
+                    MySqlCommand cmd = new MySqlCommand();
+                    cmd.Connection = connection;
+                    cmd.CommandText = "Get_Appointment_Number";
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("num_cita", MySqlDbType.Int32);
+                    cmd.Parameters["num_cita"].Direction = ParameterDirection.Output;
 
-        //Restore
-        public void Restore()
-        {
+                    cmd.ExecuteNonQuery();
+
+                    //Se guarda el resultado en una variable
+                    Int32.TryParse(cmd.Parameters["num_cita"].Value.ToString(), out result);
+                }
+                catch (MySqlException ex)
+                {
+                    Console.WriteLine(ex);
+                }
+                this.CloseConnection();
+                return result;
+            }
+            return -1;
         }
     }
 }
